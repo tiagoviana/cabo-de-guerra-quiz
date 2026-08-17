@@ -12,20 +12,21 @@
 - **Frontend:** HTML5, CSS3 (Vanilla), JavaScript (Vanilla). Não use frameworks front-end (React, Vue, etc.) nem bibliotecas de CSS (Tailwind, Bootstrap) a menos que explicitamente solicitado.
 
 ## 3. Arquitetura e Mecânicas do Jogo
-- **Papéis (Roles):** Existem três papéis fundamentais: `professor` (Host/Controlador do jogo), `esquerda` (Grupo 1) e `direita` (Grupo 2).
+- **Papéis (Roles):** Existem três papéis fundamentais: `professor` (Host/Controlador do jogo), `esquerda` (Grupo 1) e `direita` (Grupo 2). Além do papel, os alunos fornecem o próprio **nome** ao entrar no jogo (`myName`).
+- **Respostas:** O jogo permite **uma resposta por jogador**, em vez de uma por grupo. Isso significa que múltiplos alunos de um mesmo grupo podem responder e pontuar na mesma rodada.
 - **Tipos de Perguntas Suportados:**
   - `multipla_escolha`: Com botões de opções.
   - `digitar`: Resposta exata digitada pelo aluno (validação ignorando acentos e maiúsculas/minúsculas).
-  - `aberta`: Resposta em texto livre, que exige a avaliação manual do `professor`.
+  - `aberta`: Resposta em texto livre, que exige a avaliação manual do `professor`. As respostas de todos os alunos são listadas individualmente.
 - **Áudio e Efeitos:** O projeto utiliza a Web Audio API nativa (`audioCtx.createOscillator`) para gerar sons de 'correct', 'wrong' e 'victory'. Não importe arquivos de áudio externos a menos que solicitado.
-- **Interface Gráfica (SVG e CSS):** O cabo de guerra e os personagens (bonecos palito) são renderizados nativamente via SVG (`<svg viewBox="...">`). A movimentação da corda é feita atualizando o `transform: translateX(...)` com base no estado do jogo.
+- **Interface Gráfica (SVG e CSS):** O cabo de guerra e os personagens (bonecos palito) são renderizados nativamente via SVG (`<svg viewBox="...">`). A movimentação da corda é feita atualizando o `transform: translateX(...)` com base no estado do jogo. O jogo também conta com uma tela de Créditos ao final da partida e na tela de login.
 
 ## 4. Diretrizes de Código
 - **Backend (`server.js`):**
   - Mantenha a lógica do WebSocket limpa e modular.
   - Utilize `rooms` para isolar partidas diferentes.
   - O estado do jogo deve ser a fonte da verdade (`rooms[code]`). Não confie no cliente para regras de negócio e validação.
-  - O estado gerencia as respostas abertas em `openAnswers` e quem já respondeu em `answered`.
+  - O estado gerencia quem já respondeu em `answered` (array de nomes por grupo) e as respostas abertas em `openAnswers` (array de objetos `{ name, answer }`).
 
 - **Frontend (`public/`):**
   - Mantenha a separação de responsabilidades: `index.html` para estrutura, `style.css` para estilos, `app.js` para lógica e comunicação via Socket.io.
@@ -39,7 +40,7 @@
 ## 5. Diretrizes de Comunicação e IA
 - Responda de forma concisa e sempre em português, a menos que solicitado de outra forma.
 - Se for implementar uma nova funcionalidade que impacte o estado do jogo (ex: novos tipos de perguntas, power-ups), sempre pense em como isso afeta a sincronização do Socket.io entre o Host e os Jogadores.
-- Ao atualizar a interface no `app.js`, verifique se as alterações exigem tratamento diferenciado dependendo do `myRole` atual (`professor` vs aluno).
+- Ao atualizar a interface no `app.js`, verifique se as alterações exigem tratamento diferenciado dependendo do `myRole` atual (`professor` vs aluno) ou se afetam a renderização de listas baseadas no `myName`.
 
 ## 6. Testes e Validação
 - Ao adicionar novas lógicas de pontuação ou movimento do cabo de guerra, verifique os casos de limite da corda (`limiteVitoria`).
