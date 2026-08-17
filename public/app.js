@@ -1,6 +1,7 @@
 const socket = io();
 let myRole = '';
 let myCode = '';
+let myName = '';
 let currentState = null;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -46,18 +47,18 @@ const quizData = {
     "direita": { "nome": "Grupo 2", "cor": "#f67b69" }
   },
   "perguntas": [
-    { "id": 1, "tipo": "multipla_escolha", "enunciado": "These are Commons names for steroids, except:", "opcoes": ["juice", "gym candy", "roids", "gels"], "respostaCorretaIndex": 3, "pontos": 10 },
+    { "id": 1, "tipo": "multipla_escolha", "enunciado": "These are common names for steroids, except:", "opcoes": ["juice", "gym candy", "roids", "gels"], "respostaCorretaIndex": 3, "pontos": 10 },
     { "id": 2, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids are synthetic versions of which naturally occurring human hormone?", "opcoes": ["estrogen", "testosterone", "insulin", "adrenaline"], "respostaCorretaIndex": 1, "pontos": 10 },
     { "id": 3, "tipo": "digitar", "enunciado": "What is the visible effect of steroids on the skin?", "respostasAceitas": ["acne", "acnes"], "pontos": 10 },
     { "id": 4, "tipo": "digitar", "enunciado": "Name two serious internal organs damaged by steroids:", "respostasAceitas": ["heart and liver", "liver and heart", "heart, liver", "liver, heart"], "pontos": 10 },
     { "id": 5, "tipo": "multipla_escolha", "enunciado": "How do people misuse steroids?", "opcoes": ["By swallowing pills and using injections", "applying creams to the skin and drinking substances", "applying gels to the skin and using lotions for hair", "using injections and drinking substances"], "respostaCorretaIndex": 0, "pontos": 10 },
     { "id": 6, "tipo": "multipla_escolha", "enunciado": "Deeper voice and growth of facial hair happen in:", "opcoes": ["men", "women", "some men and most women", "women and men"], "respostaCorretaIndex": 1, "pontos": 10 },
     { "id": 7, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids are synthetic (man-made) versions of which hormone?", "opcoes": ["progesterone", "insulin", "testosterone", "nandrolone"], "respostaCorretaIndex": 2, "pontos": 10 },
-    { "id": 8, "tipo": "multipla_escolha", "enunciado": "Can happen to a man's body if he uses steroids, except?", "opcoes": ["Breast growth (gynecomastia)", "shrinking of the testicles", "hair loss", "blindness"], "respostaCorretaIndex": 3, "pontos": 10 },
+    { "id": 8, "tipo": "multipla_escolha", "enunciado": "All of these can happen to a man's body if he uses steroids, except:", "opcoes": ["Breast growth (gynecomastia)", "shrinking of the testicles", "hair loss", "blindness"], "respostaCorretaIndex": 3, "pontos": 10 },
     { "id": 9, "tipo": "multipla_escolha", "enunciado": "Steroids build muscle even if you don't work out.", "opcoes": ["true", "false", "true for women", "false only for men"], "respostaCorretaIndex": 1, "pontos": 10 },
     { "id": 10, "tipo": "digitar", "enunciado": "Steroids cause stunted growth because they make bones mature too fast and stop growing early. This can happen in:", "respostasAceitas": ["teenagers", "teens", "adolescents"], "pontos": 10 },
-    { "id": 11, "tipo": "aberta", "enunciado": "Name one of some specific anabolic steroids used in bodybuilding?", "gabarito": "Nandrolone OR Oxandrolone OR Testosterone", "pontos": 10 },
-    { "id": 12, "tipo": "multipla_escolha", "enunciado": "\"Roid Rage\" is not represented by?", "opcoes": ["Extreme aggression", "violent behavior", "severe mood swings", "heart attacks"], "respostaCorretaIndex": 3, "pontos": 10 },
+    { "id": 11, "tipo": "aberta", "enunciado": "Name a specific anabolic steroid used in bodybuilding.", "gabarito": "Nandrolone OR Oxandrolone OR Testosterone", "pontos": 10 },
+    { "id": 12, "tipo": "multipla_escolha", "enunciado": "\"Roid Rage\" is not represented by:", "opcoes": ["Extreme aggression", "violent behavior", "severe mood swings", "heart attacks"], "respostaCorretaIndex": 3, "pontos": 10 },
     { "id": 13, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids can _____ be used by doctors to treat health problems.", "opcoes": ["never", "sometimes", "rarely", "always"], "respostaCorretaIndex": 1, "pontos": 10 }
   ]
 };
@@ -92,6 +93,7 @@ function joinGame(team) {
     const playerName = document.getElementById('input-player-name').value.trim();
 
     if (!playerName) { alert("Por favor, digite o seu nome para entrar na equipe."); return; }
+    myName = playerName;
     socket.emit('joinRoom', { code, role: team, name: playerName });
 }
 
@@ -206,7 +208,19 @@ function renderState(state) {
         document.getElementById('q-gabarito').classList.add('hidden');
     } else if (state.isGameOver) {
         document.getElementById('q-enunciado').innerText = "Jogo Finalizado! Veja o placar final.";
-        document.getElementById('q-options').innerHTML = '';
+        
+        const creditsHTML = `
+            <div style="grid-column: 1 / -1; margin-top: 1rem; padding: 2rem; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.6; color: #334155; font-size: 1.2rem;">
+                <h3 style="text-align: center; margin-top: 0; color: #0f172a; font-size: 1.8rem; margin-bottom: 20px;">Créditos</h3>
+                <strong>Universidade:</strong> Universidade Federal de Sergipe (UFS)<br>
+                <strong>Curso:</strong> Programa de Pós-Graduação em Letras (PPGLES)<br>
+                <strong>Disciplina:</strong> Produção de materiais didáticos interculturais e multimodais<br>
+                <strong>Professoras:</strong> Acacia Lima Santos e Maria Amália Vargas Façanha<br>
+                <strong>Autores:</strong> Alysson Oliveira Barbosa, José Adelson da Silva Júnior e Tiago Viana de Souza
+            </div>
+        `;
+        
+        document.getElementById('q-options').innerHTML = creditsHTML;
         document.getElementById('q-gabarito').classList.add('hidden');
     }
 }
@@ -230,10 +244,10 @@ function renderQuestion(state) {
             
             btn.onclick = () => {
                 if(myRole === 'esquerda' || myRole === 'direita') {
-                    socket.emit('submitAnswer', { code: myCode, team: myRole, answer: idx });
+                    socket.emit('submitAnswer', { code: myCode, team: myRole, name: myName, answer: idx });
                 } else if (myRole === 'professor') {
-                    socket.emit('submitAnswer', { code: myCode, team: 'esquerda', answer: idx });
-                    socket.emit('submitAnswer', { code: myCode, team: 'direita', answer: idx });
+                    socket.emit('submitAnswer', { code: myCode, team: 'esquerda', name: 'Professor', answer: idx });
+                    socket.emit('submitAnswer', { code: myCode, team: 'direita', name: 'Professor', answer: idx });
                 }
             };
             optsDiv.appendChild(btn);
@@ -245,7 +259,8 @@ function renderQuestion(state) {
         input.onkeypress = (e) => {
             if (e.key === 'Enter') {
                 const team = myRole === 'professor' ? 'esquerda' : myRole;
-                socket.emit('submitAnswer', { code: myCode, team: team, answer: input.value });
+                const name = myRole === 'professor' ? 'Professor' : myName;
+                socket.emit('submitAnswer', { code: myCode, team: team, name: name, answer: input.value });
                 input.value = '';
             }
         };
@@ -264,8 +279,12 @@ function renderQuestion(state) {
         ansContainer.style.marginTop = "15px";
         ansContainer.style.width = "100%";
 
-        const ansEsq = state.openAnswers && state.openAnswers.esquerda !== null ? state.openAnswers.esquerda : '<span style="color:#94a3b8; font-style:italic;">Aguardando resposta...</span>';
-        const ansDir = state.openAnswers && state.openAnswers.direita !== null ? state.openAnswers.direita : '<span style="color:#94a3b8; font-style:italic;">Aguardando resposta...</span>';
+        const mapAnswers = (ansArray) => ansArray && ansArray.length > 0 
+            ? ansArray.map(a => `<div style="margin-bottom:8px;"><b>${a.name}:</b> ${a.answer}</div>`).join('') 
+            : '<span style="color:#94a3b8; font-style:italic;">Aguardando resposta...</span>';
+
+        const ansEsq = mapAnswers(state.openAnswers?.esquerda);
+        const ansDir = mapAnswers(state.openAnswers?.direita);
 
         ansContainer.innerHTML = `
             <div style="flex:1; padding: 15px; background: #f8fafc; border: 2px solid var(--cor-esq); border-radius: 8px; text-align: left;">
@@ -283,7 +302,7 @@ function renderQuestion(state) {
             gabaritoDiv.innerText = "Gabarito: " + q.gabarito;
             gabaritoDiv.classList.remove('hidden');
         } else {
-            if (state.answered[myRole]) {
+            if (state.answered[myRole].includes(myName)) {
                 const msg = document.createElement('h3');
                 msg.innerText = "Resposta enviada! Aguardando o professor avaliar.";
                 msg.style.gridColumn = "1 / -1";
@@ -309,7 +328,7 @@ function renderQuestion(state) {
                 
                 btn.onclick = () => {
                     if (input.value.trim() !== '') {
-                        socket.emit('submitAnswer', { code: myCode, team: myRole, answer: input.value });
+                        socket.emit('submitAnswer', { code: myCode, team: myRole, name: myName, answer: input.value });
                     }
                 };
 

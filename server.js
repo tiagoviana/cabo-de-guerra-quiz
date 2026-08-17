@@ -16,12 +16,12 @@ function createEmptyGameState() {
         ropePos: 0,
         currentQ: -1,
         scores: { esquerda: 0, direita: 0 },
-        answered: { esquerda: false, direita: false },
+        answered: { esquerda: [], direita: [] },
         winner: null,
         isGameOver: false,
         showAnswer: false,
         players: { esquerda: [], direita: [] },
-        openAnswers: { esquerda: null, direita: null } // NOVO: Guarda as respostas de texto livre
+        openAnswers: { esquerda: [], direita: [] } // Guarda as respostas de texto livre
     };
 }
 
@@ -77,8 +77,8 @@ io.on('connection', (socket) => {
             rooms[code].winner = null;
             rooms[code].isGameOver = false;
             rooms[code].scores = { esquerda: 0, direita: 0 };
-            rooms[code].answered = { esquerda: false, direita: false };
-            rooms[code].openAnswers = { esquerda: null, direita: null };
+            rooms[code].answered = { esquerda: [], direita: [] };
+            rooms[code].openAnswers = { esquerda: [], direita: [] };
             rooms[code].showAnswer = false;
             io.to(code).emit('stateUpdate', rooms[code]);
         }
@@ -89,8 +89,8 @@ io.on('connection', (socket) => {
         if (state && state.quiz) {
             if (state.currentQ < state.quiz.perguntas.length - 1) {
                 state.currentQ++;
-                state.answered = { esquerda: false, direita: false };
-                state.openAnswers = { esquerda: null, direita: null }; // Limpa as respostas abertas
+                state.answered = { esquerda: [], direita: [] };
+                state.openAnswers = { esquerda: [], direita: [] }; // Limpa as respostas abertas
                 state.showAnswer = false;
                 io.to(code).emit('stateUpdate', state);
             } else {
@@ -113,22 +113,22 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('submitAnswer', ({ code, team, answer }) => {
+    socket.on('submitAnswer', ({ code, team, name, answer }) => {
         const state = rooms[code];
         if (!state || state.winner || state.isGameOver || state.currentQ < 0) return;
         
         const q = state.quiz.perguntas[state.currentQ];
-        if (state.answered[team]) return;
+        if (state.answered[team].includes(name)) return;
         
         // NOVO: Se for pergunta aberta, salva o texto e encerra a função aqui, sem som de erro/acerto.
         if (q.tipo === 'aberta') {
-            state.openAnswers[team] = answer;
-            state.answered[team] = true;
+            state.openAnswers[team].push({ name, answer });
+            state.answered[team].push(name);
             io.to(code).emit('stateUpdate', state);
             return;
         }
 
-        state.answered[team] = true;
+        state.answered[team].push(name);
         let isCorrect = false;
 
         if (q.tipo === 'multipla_escolha') {
