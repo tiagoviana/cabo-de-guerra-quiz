@@ -54,3 +54,10 @@ footer { background: #1e293b; color: white; padding: 1.5rem; text-align: center;
 .hidden { display: none !important; }
 #json-error { color: #ef4444; margin-top: 10px; font-weight: bold; }
 .gabarito-box { background: #fef08a; padding: 1rem; border-radius: 8px; color: #854d0e; font-size: 1.5rem; font-weight: bold; margin-top: 1rem; }
+/* CONSTRUTOR DE QUIZ */
+.builder-q-card { background: white; border: 2px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
+.builder-q-card h4 { margin-top: 0; color: #475569; }
+.btn-remove-q { position: absolute; top: 15px; right: 15px; background: #ef4444; color: white; padding: 5px 10px; font-size: 0.9rem; }
+.builder-q-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+.builder-q-row input[type="text"] { margin: 0; flex: 1; }
+.builder-q-row input[type="radio"] { width: 20px; height: 20px; cursor: pointer; }

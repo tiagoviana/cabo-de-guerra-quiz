@@ -63,7 +63,12 @@ const quizData = {
   ]
 };
 
-document.getElementById('btn-create-room').onclick = () => { socket.emit('createRoom'); };
+let currentQuizToLoad = quizData;
+
+document.getElementById('btn-create-room').onclick = () => { 
+    currentQuizToLoad = quizData;
+    socket.emit('createRoom'); 
+};
 
 document.getElementById('btn-check-room').onclick = () => {
     const code = document.getElementById('input-room-code').value.trim();
@@ -111,12 +116,12 @@ socket.on('roomCreated', (code) => {
     showGameScreen();
     document.getElementById('prof-controls').classList.remove('hidden');
     
-    document.documentElement.style.setProperty('--cor-esq', quizData.times.esquerda.cor);
-    document.documentElement.style.setProperty('--cor-dir', quizData.times.direita.cor);
-    document.getElementById('nome-esq').innerText = quizData.times.esquerda.nome;
-    document.getElementById('nome-dir').innerText = quizData.times.direita.nome;
+    document.documentElement.style.setProperty('--cor-esq', currentQuizToLoad.times.esquerda.cor);
+    document.documentElement.style.setProperty('--cor-dir', currentQuizToLoad.times.direita.cor);
+    document.getElementById('nome-esq').innerText = currentQuizToLoad.times.esquerda.nome;
+    document.getElementById('nome-dir').innerText = currentQuizToLoad.times.direita.nome;
     
-    socket.emit('loadQuiz', { code: myCode, quizData: quizData });
+    socket.emit('loadQuiz', { code: myCode, quizData: currentQuizToLoad });
 });
 
 socket.on('joined', ({ code, role, state }) => {
@@ -344,4 +349,156 @@ function renderQuestion(state) {
             }
         }
     }
+}
+
+// ========================
+// LOGICA DO CONSTRUTOR DE QUIZ
+// ========================
+let questionCount = 0;
+
+document.getElementById('btn-create-custom-room').onclick = () => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-builder').classList.add('active');
+    // Se não tem perguntas, adiciona uma padrão vazia
+    if(questionCount === 0) addQuestionUI('multipla_escolha');
+};
+
+document.getElementById('btn-start-custom').onclick = () => {
+    const custom = buildQuizFromUI();
+    if(custom) {
+        currentQuizToLoad = custom;
+        socket.emit('createRoom');
+    }
+};
+
+document.getElementById('btn-export-quiz').onclick = () => {
+    const custom = buildQuizFromUI();
+    if(custom) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(custom, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "meu_quiz.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+};
+
+document.getElementById('input-import-quiz').onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        try {
+            const imported = JSON.parse(evt.target.result);
+            if(!imported.perguntas) throw new Error("JSON Inválido");
+            currentQuizToLoad = imported;
+            socket.emit('createRoom');
+        } catch(err) {
+            alert("Erro ao importar o arquivo JSON. Verifique se ele está no formato correto.");
+        }
+    };
+    reader.readAsText(file);
+};
+
+function cancelBuilder() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-login').classList.add('active');
+}
+
+function addQuestionUI(type) {
+    questionCount++;
+    const id = questionCount;
+    const container = document.getElementById('builder-questions');
+    
+    const card = document.createElement('div');
+    card.className = 'builder-q-card';
+    card.id = `builder-q-${id}`;
+    card.dataset.type = type;
+    
+    let innerHTML = `<button class="btn-remove-q" onclick="document.getElementById('builder-q-${id}').remove()">X Remover</button>`;
+    
+    if (type === 'multipla_escolha') {
+        innerHTML += `<h4>Pergunta ${id} - Múltipla Escolha</h4>
+        <input type="text" class="q-enunciado" placeholder="Digite a pergunta">
+        <div class="q-options-container">
+            <div class="builder-q-row"><input type="radio" name="q-${id}-correct" value="0" checked> <input type="text" class="q-opt" placeholder="Opção 1"></div>
+            <div class="builder-q-row"><input type="radio" name="q-${id}-correct" value="1"> <input type="text" class="q-opt" placeholder="Opção 2"></div>
+            <div class="builder-q-row"><input type="radio" name="q-${id}-correct" value="2"> <input type="text" class="q-opt" placeholder="Opção 3"></div>
+            <div class="builder-q-row"><input type="radio" name="q-${id}-correct" value="3"> <input type="text" class="q-opt" placeholder="Opção 4"></div>
+        </div>`;
+    } else if (type === 'digitar') {
+        innerHTML += `<h4>Pergunta ${id} - Digitar</h4>
+        <input type="text" class="q-enunciado" placeholder="Digite a pergunta">
+        <label style="font-weight:bold; margin-top:10px; display:block;">Respostas Aceitas (separadas por vírgula):</label>
+        <input type="text" class="q-respostas" placeholder="ex: acne, espinhas">`;
+    } else if (type === 'aberta') {
+        innerHTML += `<h4>Pergunta ${id} - Aberta</h4>
+        <input type="text" class="q-enunciado" placeholder="Digite a pergunta">
+        <label style="font-weight:bold; margin-top:10px; display:block;">Gabarito / Expectativa (para o professor avaliar):</label>
+        <input type="text" class="q-gabarito" placeholder="ex: O aluno deve mencionar X e Y">`;
+    }
+    
+    card.innerHTML = innerHTML;
+    container.appendChild(card);
+}
+
+function buildQuizFromUI() {
+    const title = document.getElementById('builder-title').value.trim() || 'Meu Quiz Personalizado';
+    const teamEsq = document.getElementById('builder-team-esq').value.trim() || 'Grupo 1';
+    const teamDir = document.getElementById('builder-team-dir').value.trim() || 'Grupo 2';
+    
+    const quiz = {
+        "titulo": title,
+        "config": { "passoPorAcerto": 15, "limiteVitoria": 100, "erroPuxaAdversario": true },
+        "times": {
+            "esquerda": { "nome": teamEsq, "cor": "#203b66" },
+            "direita": { "nome": teamDir, "cor": "#f67b69" }
+        },
+        "perguntas": []
+    };
+    
+    const cards = document.querySelectorAll('.builder-q-card');
+    if (cards.length === 0) {
+        alert("Adicione pelo menos uma pergunta!");
+        return null;
+    }
+    
+    let isValid = true;
+    
+    cards.forEach((card, index) => {
+        const tipo = card.dataset.type;
+        const enunciado = card.querySelector('.q-enunciado').value.trim();
+        
+        if (!enunciado) isValid = false;
+        
+        let p = {
+            id: index + 1,
+            tipo: tipo,
+            enunciado: enunciado,
+            pontos: 10
+        };
+        
+        if (tipo === 'multipla_escolha') {
+            const optsInputs = card.querySelectorAll('.q-opt');
+            p.opcoes = Array.from(optsInputs).map(i => i.value.trim() || 'Opção');
+            const checkedRadio = card.querySelector(`input[type="radio"]:checked`);
+            p.respostaCorretaIndex = checkedRadio ? parseInt(checkedRadio.value) : 0;
+        } else if (tipo === 'digitar') {
+            const rawAnswers = card.querySelector('.q-respostas').value;
+            p.respostasAceitas = rawAnswers.split(',').map(s => s.trim()).filter(s => s);
+            if (p.respostasAceitas.length === 0) isValid = false;
+        } else if (tipo === 'aberta') {
+            p.gabarito = card.querySelector('.q-gabarito').value.trim() || 'Sem gabarito';
+        }
+        
+        quiz.perguntas.push(p);
+    });
+    
+    if (!isValid) {
+        alert("Por favor, preencha todos os enunciados e respostas aceitas para perguntas de digitar.");
+        return null;
+    }
+    
+    return quiz;
 }
