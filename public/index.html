@@ -108,15 +108,18 @@
         <div class="cards">
             <div class="card">
                 <h2>Professor</h2>
-                <button id="btn-create-room" style="margin-bottom: 10px; width: 100%;">Criar Sala (Inglês)</button>
-                <button id="btn-create-custom-room" style="background: #0284c7; margin-bottom: 10px; width: 100%;">Criar
-                    Meu Próprio Quiz</button>
-
-                <label for="input-import-quiz" class="btn-import"
-                    style="display: block; background: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;">Importar
-                    Quiz (.json)</label>
-                <input type="file" id="input-import-quiz" accept=".json" class="hidden">
+                <button id="btn-create-room" style="margin-bottom: 10px; width: 100%;">Criar Sala</button>
+                <button onclick="document.getElementById('dialog-options').showModal()" style="background: #94a3b8; width: 100%;">Outras Opções</button>
             </div>
+            
+            <dialog id="dialog-options" style="border: none; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); max-width: 400px; width: 90%; margin: auto;">
+                <h3 style="margin-top: 0; color: #334155; text-align: center;">Outras Opções</h3>
+                <button id="btn-create-custom-room" style="background: #0284c7; margin-bottom: 10px; width: 100%;">Criar Meu Próprio Quiz</button>
+                <label for="input-import-quiz" class="btn-import"
+                    style="display: block; width: 100%; box-sizing: border-box; text-align: center; background: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;">Importar Quiz</label>
+                <input type="file" id="input-import-quiz" accept=".json" class="hidden">
+                <button onclick="document.getElementById('dialog-options').close()" style="margin-top: 15px; background: #ef4444; width: 100%;">Fechar</button>
+            </dialog>
             <div class="card">
                 <h2>Alunos (Jogadores)</h2>
                 <input type="text" id="input-room-code" placeholder="Código da Sala (Ex: 1234)">
@@ -178,7 +181,7 @@
 
             <div class="builder-actions"
                 style="margin-top: 2rem; display: flex; gap: 10px; justify-content: center; border-top: 2px solid #cbd5e1; padding-top: 2rem;">
-                <button id="btn-export-quiz" style="background: #16a34a;">Salvar / Exportar JSON</button>
+                <button id="btn-export-quiz" style="background: #16a34a;">Salvar / Exportar Quiz</button>
                 <button id="btn-start-custom" style="background: #eab308; color: #0f172a;">Iniciar Jogo com este
                     Quiz</button>
                 <button onclick="cancelBuilder()" style="background: #ef4444;">Cancelar</button>
@@ -191,16 +194,19 @@
             <div class="team-info esquerda">
                 <h3 id="nome-esq">Grupo 1</h3>
                 <span class="score" id="score-esq">0 pts</span>
+                <span class="rounds" id="rounds-esq" style="font-size: 1.1rem; color: #64748b; font-weight: bold; margin-bottom: 5px; display: block; text-align: center;">Vitórias: 0</span>
                 <div class="player-list-container">
                     <ul id="list-esq" class="player-list"></ul>
                 </div>
             </div>
-            <div class="room-info">
+            <div class="room-info" style="display: flex; flex-direction: column; align-items: center;">
                 <span>SALA: <strong id="display-room-code">----</strong></span>
+                <button onclick="if(confirm('Tem certeza que deseja sair do jogo?')) window.location.reload();" style="margin-top: 8px; font-size: 0.8rem; padding: 6px 12px; background: #ef4444; border-radius: 6px;">Sair do Jogo</button>
             </div>
             <div class="team-info direita">
                 <h3 id="nome-dir">Grupo 2</h3>
                 <span class="score" id="score-dir">0 pts</span>
+                <span class="rounds" id="rounds-dir" style="font-size: 1.1rem; color: #64748b; font-weight: bold; margin-bottom: 5px; display: block; text-align: center;">Vitórias: 0</span>
                 <div class="player-list-container">
                     <ul id="list-dir" class="player-list"></ul>
                 </div>

@@ -41,25 +41,25 @@ function playArcadeSound(type) {
 
 const quizData = {
   "titulo": "English Quiz - Health & Steroids",
-  "config": { "passoPorAcerto": 15, "limiteVitoria": 100, "erroPuxaAdversario": true },
+  "config": { "passoPorAcerto": 5, "limiteVitoria": 100, "erroPuxaAdversario": true },
   "times": {
     "esquerda": { "nome": "Grupo 1", "cor": "#203b66" }, 
     "direita": { "nome": "Grupo 2", "cor": "#f67b69" }
   },
   "perguntas": [
-    { "id": 1, "tipo": "multipla_escolha", "enunciado": "These are common names for steroids, except:", "opcoes": ["juice", "gym candy", "roids", "gels"], "respostaCorretaIndex": 3, "pontos": 10 },
-    { "id": 2, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids are synthetic versions of which naturally occurring human hormone?", "opcoes": ["estrogen", "testosterone", "insulin", "adrenaline"], "respostaCorretaIndex": 1, "pontos": 10 },
-    { "id": 3, "tipo": "digitar", "enunciado": "What is the visible effect of steroids on the skin?", "respostasAceitas": ["acne", "acnes"], "pontos": 10 },
-    { "id": 4, "tipo": "digitar", "enunciado": "Name two serious internal organs damaged by steroids:", "respostasAceitas": ["heart and liver", "liver and heart", "heart, liver", "liver, heart"], "pontos": 10 },
-    { "id": 5, "tipo": "multipla_escolha", "enunciado": "How do people misuse steroids?", "opcoes": ["By swallowing pills and using injections", "applying creams to the skin and drinking substances", "applying gels to the skin and using lotions for hair", "using injections and drinking substances"], "respostaCorretaIndex": 0, "pontos": 10 },
-    { "id": 6, "tipo": "multipla_escolha", "enunciado": "Deeper voice and growth of facial hair happen in:", "opcoes": ["men", "women", "some men and most women", "women and men"], "respostaCorretaIndex": 1, "pontos": 10 },
-    { "id": 7, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids are synthetic (man-made) versions of which hormone?", "opcoes": ["progesterone", "insulin", "testosterone", "nandrolone"], "respostaCorretaIndex": 2, "pontos": 10 },
-    { "id": 8, "tipo": "multipla_escolha", "enunciado": "All of these can happen to a man's body if he uses steroids, except:", "opcoes": ["Breast growth (gynecomastia)", "shrinking of the testicles", "hair loss", "blindness"], "respostaCorretaIndex": 3, "pontos": 10 },
-    { "id": 9, "tipo": "multipla_escolha", "enunciado": "Steroids build muscle even if you don't work out.", "opcoes": ["true", "false", "true for women", "false only for men"], "respostaCorretaIndex": 1, "pontos": 10 },
-    { "id": 10, "tipo": "digitar", "enunciado": "Steroids cause stunted growth because they make bones mature too fast and stop growing early. This can happen in:", "respostasAceitas": ["teenagers", "teens", "adolescents"], "pontos": 10 },
-    { "id": 11, "tipo": "aberta", "enunciado": "Name a specific anabolic steroid used in bodybuilding.", "gabarito": "Nandrolone OR Oxandrolone OR Testosterone", "pontos": 10 },
-    { "id": 12, "tipo": "multipla_escolha", "enunciado": "\"Roid Rage\" is not represented by:", "opcoes": ["Extreme aggression", "violent behavior", "severe mood swings", "heart attacks"], "respostaCorretaIndex": 3, "pontos": 10 },
-    { "id": 13, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids can _____ be used by doctors to treat health problems.", "opcoes": ["never", "sometimes", "rarely", "always"], "respostaCorretaIndex": 1, "pontos": 10 }
+    { "id": 1, "tipo": "multipla_escolha", "enunciado": "These are common names for steroids, except:", "opcoes": ["juice", "gym candy", "roids", "gels"], "respostaCorretaIndex": 3, "pontos": 5 },
+    { "id": 2, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids are synthetic versions of which naturally occurring human hormone?", "opcoes": ["estrogen", "testosterone", "insulin", "adrenaline"], "respostaCorretaIndex": 1, "pontos": 5 },
+    { "id": 3, "tipo": "digitar", "enunciado": "What is the visible effect of steroids on the skin?", "respostasAceitas": ["acne", "acnes"], "pontos": 5 },
+    { "id": 4, "tipo": "digitar", "enunciado": "Name two serious internal organs damaged by steroids:", "respostasAceitas": ["heart and liver", "liver and heart", "heart, liver", "liver, heart"], "pontos": 5 },
+    { "id": 5, "tipo": "multipla_escolha", "enunciado": "How do people misuse steroids?", "opcoes": ["By swallowing pills and using injections", "applying creams to the skin and drinking substances", "applying gels to the skin and using lotions for hair", "using injections and drinking substances"], "respostaCorretaIndex": 0, "pontos": 5 },
+    { "id": 6, "tipo": "multipla_escolha", "enunciado": "Deeper voice and growth of facial hair happen in:", "opcoes": ["men", "women", "some men and most women", "women and men"], "respostaCorretaIndex": 1, "pontos": 5 },
+    { "id": 7, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids are synthetic (man-made) versions of which hormone?", "opcoes": ["progesterone", "insulin", "testosterone", "nandrolone"], "respostaCorretaIndex": 2, "pontos": 5 },
+    { "id": 8, "tipo": "multipla_escolha", "enunciado": "All of these can happen to a man's body if he uses steroids, except:", "opcoes": ["Breast growth (gynecomastia)", "shrinking of the testicles", "hair loss", "blindness"], "respostaCorretaIndex": 3, "pontos": 5 },
+    { "id": 9, "tipo": "multipla_escolha", "enunciado": "Steroids build muscle even if you don't work out.", "opcoes": ["true", "false", "true for women", "false only for men"], "respostaCorretaIndex": 1, "pontos": 5 },
+    { "id": 10, "tipo": "digitar", "enunciado": "Steroids cause stunted growth because they make bones mature too fast and stop growing early. This can happen in:", "respostasAceitas": ["teenagers", "teens", "adolescents"], "pontos": 5 },
+    { "id": 11, "tipo": "aberta", "enunciado": "Name a specific anabolic steroid used in bodybuilding.", "gabarito": "Nandrolone OR Oxandrolone OR Testosterone", "pontos": 5 },
+    { "id": 12, "tipo": "multipla_escolha", "enunciado": "\"Roid Rage\" is not represented by:", "opcoes": ["Extreme aggression", "violent behavior", "severe mood swings", "heart attacks"], "respostaCorretaIndex": 3, "pontos": 5 },
+    { "id": 13, "tipo": "multipla_escolha", "enunciado": "Anabolic steroids can _____ be used by doctors to treat health problems.", "opcoes": ["never", "sometimes", "rarely", "always"], "respostaCorretaIndex": 1, "pontos": 5 }
   ]
 };
 
@@ -158,6 +158,9 @@ function renderState(state) {
     
     document.getElementById('score-esq').innerText = state.scores.esquerda + ' pts';
     document.getElementById('score-dir').innerText = state.scores.direita + ' pts';
+    
+    document.getElementById('rounds-esq').innerText = 'Vitórias: ' + (state.rounds?.esquerda || 0);
+    document.getElementById('rounds-dir').innerText = 'Vitórias: ' + (state.rounds?.direita || 0);
 
     if (state.players) {
         document.getElementById('list-esq').innerHTML = state.players.esquerda.map(n => `<li>${n}</li>`).join('');
@@ -357,6 +360,7 @@ function renderQuestion(state) {
 let questionCount = 0;
 
 document.getElementById('btn-create-custom-room').onclick = () => {
+    document.getElementById('dialog-options').close();
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-builder').classList.add('active');
     // Se não tem perguntas, adiciona uma padrão vazia
@@ -385,17 +389,18 @@ document.getElementById('btn-export-quiz').onclick = () => {
 };
 
 document.getElementById('input-import-quiz').onchange = (e) => {
+    document.getElementById('dialog-options').close();
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
         try {
             const imported = JSON.parse(evt.target.result);
-            if(!imported.perguntas) throw new Error("JSON Inválido");
+            if(!imported.perguntas) throw new Error("Arquivo de Quiz Inválido");
             currentQuizToLoad = imported;
             socket.emit('createRoom');
         } catch(err) {
-            alert("Erro ao importar o arquivo JSON. Verifique se ele está no formato correto.");
+            alert("Erro ao importar o arquivo de Quiz. Verifique se ele está no formato correto.");
         }
     };
     reader.readAsText(file);
@@ -450,7 +455,7 @@ function buildQuizFromUI() {
     
     const quiz = {
         "titulo": title,
-        "config": { "passoPorAcerto": 15, "limiteVitoria": 100, "erroPuxaAdversario": true },
+        "config": { "passoPorAcerto": 5, "limiteVitoria": 100, "erroPuxaAdversario": true },
         "times": {
             "esquerda": { "nome": teamEsq, "cor": "#203b66" },
             "direita": { "nome": teamDir, "cor": "#f67b69" }
@@ -476,7 +481,7 @@ function buildQuizFromUI() {
             id: index + 1,
             tipo: tipo,
             enunciado: enunciado,
-            pontos: 10
+            pontos: 5
         };
         
         if (tipo === 'multipla_escolha') {

@@ -17,7 +17,7 @@ body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden;
 .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); width: 320px; }
 input[type="text"], textarea { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; }
 button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; background: #334155; color: white; }
-button:hover { filter: brightness(1.1); transform: scale(1.02); }
+button:hover, label.btn-import:hover { filter: brightness(1.1); transform: scale(1.02); }
 
 .team-select { display: flex; gap: 10px; margin-top: 10px; }
 .btn-team.esquerda { background: var(--cor-esq); flex: 1; }

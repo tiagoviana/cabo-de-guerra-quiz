@@ -16,6 +16,7 @@ function createEmptyGameState() {
         ropePos: 0,
         currentQ: -1,
         scores: { esquerda: 0, direita: 0 },
+        rounds: { esquerda: 0, direita: 0 },
         answered: { esquerda: [], direita: [] },
         winner: null,
         isGameOver: false,
@@ -31,6 +32,8 @@ io.on('connection', (socket) => {
         const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
         rooms[roomCode] = createEmptyGameState();
         socket.join(roomCode);
+        socket.roomCode = roomCode;
+        socket.role = 'professor';
         socket.emit('roomCreated', roomCode);
     });
 
@@ -46,6 +49,9 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', ({ code, role, name }) => {
         if (rooms[code]) {
             socket.join(code);
+            socket.roomCode = code;
+            socket.role = role;
+            socket.playerName = name;
             
             if (name && (role === 'esquerda' || role === 'direita')) {
                 if (!rooms[code].players[role].includes(name)) {
@@ -77,6 +83,7 @@ io.on('connection', (socket) => {
             rooms[code].winner = null;
             rooms[code].isGameOver = false;
             rooms[code].scores = { esquerda: 0, direita: 0 };
+            rooms[code].rounds = { esquerda: 0, direita: 0 };
             rooms[code].answered = { esquerda: [], direita: [] };
             rooms[code].openAnswers = { esquerda: [], direita: [] };
             rooms[code].showAnswer = false;
@@ -96,9 +103,15 @@ io.on('connection', (socket) => {
             } else {
                 state.isGameOver = true;
                 
-                if (state.ropePos < 0) state.winner = 'esquerda';
-                else if (state.ropePos > 0) state.winner = 'direita';
-                else state.winner = 'empate';
+                if (state.rounds.esquerda > state.rounds.direita) {
+                    state.winner = 'esquerda';
+                } else if (state.rounds.direita > state.rounds.esquerda) {
+                    state.winner = 'direita';
+                } else {
+                    if (state.scores.esquerda > state.scores.direita) state.winner = 'esquerda';
+                    else if (state.scores.direita > state.scores.esquerda) state.winner = 'direita';
+                    else state.winner = 'empate';
+                }
                 
                 io.to(code).emit('stateUpdate', state);
                 if (state.winner !== 'empate') io.to(code).emit('playSound', 'victory');
@@ -115,7 +128,7 @@ io.on('connection', (socket) => {
 
     socket.on('submitAnswer', ({ code, team, name, answer }) => {
         const state = rooms[code];
-        if (!state || state.winner || state.isGameOver || state.currentQ < 0) return;
+        if (!state || state.winner || state.isGameOver || state.currentQ < 0 || state.currentQ >= state.quiz.perguntas.length) return;
         
         const q = state.quiz.perguntas[state.currentQ];
         if (state.answered[team].includes(name)) return;
@@ -134,26 +147,37 @@ io.on('connection', (socket) => {
         if (q.tipo === 'multipla_escolha') {
             isCorrect = parseInt(answer) === q.respostaCorretaIndex;
         } else if (q.tipo === 'digitar') {
-            const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            const normalize = (str) => String(str || "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^\w\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .toLowerCase()
+                .trim();
             const normAnswer = normalize(answer);
-            isCorrect = q.respostasAceitas.some(acc => normalize(acc) === normAnswer);
+            
+            if (Array.isArray(q.respostasAceitas)) {
+                isCorrect = q.respostasAceitas.some(acc => normalize(acc) === normAnswer);
+            } else {
+                isCorrect = false;
+            }
         }
 
-        processAnswer(state, team, isCorrect, q.tipo !== 'aberta');
+        processAnswer(code, state, team, isCorrect, q.tipo !== 'aberta');
         io.to(code).emit('stateUpdate', state);
         io.to(code).emit('playSound', isCorrect ? 'correct' : 'wrong');
     });
 
     socket.on('manualGrade', ({ code, team, isCorrect }) => {
         const state = rooms[code];
-        if (state && !state.winner && !state.isGameOver) {
-            processAnswer(state, team, isCorrect, true);
+        if (state && !state.winner && !state.isGameOver && state.currentQ >= 0 && state.currentQ < state.quiz.perguntas.length) {
+            processAnswer(code, state, team, isCorrect, true);
             io.to(code).emit('stateUpdate', state);
             io.to(code).emit('playSound', isCorrect ? 'correct' : 'wrong');
         }
     });
 
-    function processAnswer(state, team, isCorrect, moveRope) {
+    function processAnswer(code, state, team, isCorrect, moveRope) {
         if (!moveRope) return;
         
         const step = state.quiz.config.passoPorAcerto;
@@ -167,18 +191,55 @@ io.on('connection', (socket) => {
             state.ropePos -= pullTarget;
         }
 
-        if (state.ropePos <= -limit) {
-            state.ropePos = -limit;
-            state.winner = 'esquerda';
-            state.isGameOver = true;
+        if (state.ropePos < -limit) state.ropePos = -limit;
+        if (state.ropePos > limit) state.ropePos = limit;
+
+        const metaDePontos = limit;
+
+        if (state.scores.esquerda >= metaDePontos) {
+            state.rounds.esquerda++;
+            state.scores.esquerda = 0;
+            state.scores.direita = 0;
+            state.ropePos = 0;
             io.to(code).emit('playSound', 'victory');
-        } else if (state.ropePos >= limit) {
-            state.ropePos = limit;
-            state.winner = 'direita';
-            state.isGameOver = true;
+        } else if (state.scores.direita >= metaDePontos) {
+            state.rounds.direita++;
+            state.scores.esquerda = 0;
+            state.scores.direita = 0;
+            state.ropePos = 0;
             io.to(code).emit('playSound', 'victory');
         }
     }
+    
+    socket.on('disconnect', () => {
+        const { roomCode, role, playerName } = socket;
+        if (roomCode && rooms[roomCode]) {
+            if (role === 'professor') {
+                const state = rooms[roomCode];
+                if (!state.isGameOver) {
+                    state.isGameOver = true;
+                    if (state.rounds.esquerda > state.rounds.direita) {
+                        state.winner = 'esquerda';
+                    } else if (state.rounds.direita > state.rounds.esquerda) {
+                        state.winner = 'direita';
+                    } else {
+                        if (state.scores.esquerda > state.scores.direita) state.winner = 'esquerda';
+                        else if (state.scores.direita > state.scores.esquerda) state.winner = 'direita';
+                        else state.winner = 'empate';
+                    }
+                    io.to(roomCode).emit('stateUpdate', state);
+                    if (state.winner !== 'empate') io.to(roomCode).emit('playSound', 'victory');
+                }
+            } else if (playerName && (role === 'esquerda' || role === 'direita')) {
+                const playersList = rooms[roomCode].players[role];
+                const index = playersList.indexOf(playerName);
+                if (index !== -1) {
+                    playersList.splice(index, 1);
+                    io.to(roomCode).emit('stateUpdate', rooms[roomCode]);
+                }
+            }
+        }
+    });
 });
 
 const PORT = process.env.PORT || 3000;

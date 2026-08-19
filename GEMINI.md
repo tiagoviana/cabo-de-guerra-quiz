@@ -13,38 +13,38 @@
 
 ## 3. Arquitetura e Mecânicas do Jogo
 - **Papéis (Roles):** Existem três papéis fundamentais: `professor` (Host/Controlador do jogo), `esquerda` (Grupo 1) e `direita` (Grupo 2). Além do papel, os alunos fornecem o próprio **nome** ao entrar no jogo (`myName`).
-- **Sala de Espera (Lobby):** Na tela de login, os alunos inserem o código e clicam em "Verificar Sala" para visualizar uma prévia (preview) de quem já está em cada grupo antes de escolher de qual equipe participar.
-- **Respostas:** O jogo permite **uma resposta por jogador**, em vez de uma por grupo. Isso significa que múltiplos alunos de um mesmo grupo podem responder e pontuar na mesma rodada.
+- **Sala de Espera (Lobby):** Na tela de login, os alunos inserem o código e clicam em "Verificar Sala" para visualizar uma prévia de quem já está em cada grupo antes de escolher a equipe.
+- **Respostas:** O jogo permite **uma resposta por jogador**, em vez de uma por grupo. Múltiplos alunos do mesmo grupo podem responder à mesma pergunta, somando pontos coletivamente.
+- **Sistema de Rounds e Pontuação:** Ao invés de acabar na primeira vitória, o jogo possui **Rounds**. Quando a pontuação de uma equipe atinge o limite (ex: 100 pontos), a equipe ganha 1 Round e a corda e os pontos são resetados. O vencedor final da partida é quem tiver mais Rounds ao final de todas as perguntas (usando os pontos residuais como desempate).
 - **Tipos de Perguntas Suportados:**
   - `multipla_escolha`: Com botões de opções.
-  - `digitar`: Resposta exata digitada pelo aluno (validação ignorando acentos e maiúsculas/minúsculas).
-  - `aberta`: Resposta em texto livre, que exige a avaliação manual do `professor` (usando os botões de Acertou/Errou por equipe). As respostas de todos os alunos são listadas individualmente, agrupadas e separadas visualmente pelas cores da equipe.
-- **Áudio e Efeitos:** O projeto utiliza a Web Audio API nativa (`audioCtx.createOscillator`) para gerar sons de 'correct', 'wrong' e 'victory'. Não importe arquivos de áudio externos a menos que solicitado.
-- **Interface Gráfica (SVG e CSS):** O cabo de guerra e os personagens (bonecos palito) são renderizados nativamente via SVG (`<svg viewBox="...">`). A movimentação da corda é feita atualizando o `transform: translateX(...)` com base no estado do jogo.
-- **Fim de Jogo e Créditos:** O jogo pode terminar com a vitória de uma equipe ou em um **empate**. O projeto conta com uma tela de Créditos ao final da partida e informações institucionais (logos, curso, autores) na tela de login.
+  - `digitar`: Resposta exata digitada pelo aluno. A validação é flexível: ignora acentos, maiúsculas/minúsculas, pontuações e espaços extras.
+  - `aberta`: Resposta em texto livre, avaliada manualmente pelo `professor` (Acertou/Errou). As respostas de todos os alunos são listadas, agrupadas e separadas visualmente pelas cores da equipe.
+- **Gestão de Salas e Conexão:** Alunos que saem ou recarregam a página são removidos dinamicamente da interface dos demais. Se o professor sair da sala, o jogo é encerrado antecipadamente e o vencedor atual é declarado.
+- **Áudio e Efeitos:** O projeto utiliza a Web Audio API nativa (`audioCtx.createOscillator`) para gerar sons de 'correct', 'wrong' e 'victory'.
+- **Interface Gráfica (SVG e CSS):** O cabo de guerra é renderizado via SVG. A movimentação da corda é atualizada proporcionalmente aos pontos.
 
 ## 4. Diretrizes de Código
 - **Backend (`server.js`):**
-  - Mantenha a lógica do WebSocket limpa e modular.
+  - Mantenha a lógica do WebSocket limpa e modular, validando sempre entradas (ex: limites de index do array de perguntas, coerção de tipos).
   - Utilize `rooms` para isolar partidas diferentes.
-  - O estado do jogo deve ser a fonte da verdade (`rooms[code]`). Não confie no cliente para regras de negócio e validação.
-  - O estado gerencia quem já respondeu em `answered` (array de nomes por grupo) e as respostas abertas em `openAnswers` (array de objetos `{ name, answer }`).
+  - O estado do jogo deve ser a fonte da verdade (`rooms[code]`). Não confie no cliente para regras de negócio.
+  - O estado gerencia quem já respondeu (`answered`), as respostas abertas (`openAnswers`) e contabiliza o limite de vitórias (`rounds`).
 
 - **Frontend (`public/`):**
-  - Mantenha a separação de responsabilidades: `index.html` para estrutura, `style.css` para estilos, `app.js` para lógica e comunicação via Socket.io.
-  - A interface reage exclusivamente ao evento `stateUpdate` do Socket.io. A função `renderState(state)` centraliza a atualização da UI.
+  - O conteúdo base do quiz (`quizData`) é injetado, mas o professor pode usar a interface do Construtor de Quiz (Builder) para criar perguntas dinamicamente ou importar/exportar quizzes.
+  - A interface reage ao evento `stateUpdate` do Socket.io usando `renderState(state)` de forma reativa.
   - Painéis de controle são exibidos apenas para o papel `professor`.
-  - O conteúdo do quiz (`quizData`) encontra-se fixado diretamente no `app.js` na versão atual.
 
 - **Estilos (`style.css`):**
-  - As cores das equipes são dinâmicas e configuradas via variáveis CSS (`--cor-esq`, `--cor-dir`), podendo ser sobrescritas pelo JSON do quiz.
-  - Priorize designs responsivos e lúdicos. Animações de vitória e puxões de corda devem ser suaves (usando `transition` e `keyframes`).
+  - As cores das equipes (`--cor-esq`, `--cor-dir`) são variáveis CSS dinâmicas baseadas nas configurações do quiz.
+  - Animações e controles de UI devem ser amigáveis e minimalistas.
 
 ## 5. Diretrizes de Comunicação e IA
 - Responda de forma concisa e sempre em português, a menos que solicitado de outra forma.
-- Se for implementar uma nova funcionalidade que impacte o estado do jogo (ex: novos tipos de perguntas, power-ups), sempre pense em como isso afeta a sincronização do Socket.io entre o Host e os Jogadores.
-- Ao atualizar a interface no `app.js`, verifique se as alterações exigem tratamento diferenciado dependendo do `myRole` atual (`professor` vs aluno) ou se afetam a renderização de listas baseadas no `myName`.
+- Se for implementar uma nova funcionalidade, pense sempre em como ela afeta a sincronização do Socket.io entre o Host e os Jogadores (ex: como atualizar o `state`).
+- Ao atualizar a interface no `app.js`, verifique se as alterações exigem tratamento diferenciado dependendo do `myRole` (ex: botões extras para o professor).
 
 ## 6. Testes e Validação
-- Ao adicionar novas lógicas de pontuação ou movimento do cabo de guerra, verifique os casos de limite da corda (`limiteVitoria`).
-- Ao enviar código que afete o Socket.io, certifique-se de tratar adequadamente cenários de fluxo de jogo (ex: o que acontece se o aluno entra com a partida em andamento).
+- Ao adicionar novas lógicas, trate adequadamente cenários de limite (ex: `state.currentQ < 0`), tipos de dados forjados no socket e fluxo de jogo interativo.
+- Certifique-se de que modificações visuais não quebrem a responsividade dos elementos SVG ou dos cartões de layout.
